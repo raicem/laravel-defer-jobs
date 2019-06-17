@@ -1,0 +1,40 @@
+{
+    "name": "raicem/laravel-defer",
+    "description": "Defer your jobs to be executed after the response is sent. Without a queue system.",
+    "keywords": [
+        "laravel",
+        "queue",
+        "deferring"
+    ],
+    "homepage": "https://github.com/raicem/laravel-defer",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Cem Ünalan",
+            "email": "unalancem@gmail.com",
+            "homepage": "https://github.com/raicem/laravel-defer",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.2"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.15"
+    },
+    "autoload": {
+        "psr-4": {
+            "Raicem\\Defer\\": "src"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Raicem\\Defer\\DeferServiceProvider"
+            ]
+        }
+    }
+}
