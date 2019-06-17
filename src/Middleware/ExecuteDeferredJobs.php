@@ -7,7 +7,7 @@ use Raicem\Defer\Deferrer;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Support\Str;
 
-class ExecuteDeferredJobs 
+class ExecuteDeferredJobs
 {
     private $deferrer;
     private $dispatcher;

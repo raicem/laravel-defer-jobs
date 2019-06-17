@@ -36,5 +36,8 @@
                 "Raicem\\Defer\\DeferServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "format": "./vendor/bin/php-cs-fixer fix src"
     }
 }
