@@ -1,4 +1,4 @@
-## Laravel Defer
+## Laravel Defer Jobs
 
 Defer your jobs to be executed after the response is sent\*. Without a queue system.
 
