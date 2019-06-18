@@ -5,7 +5,7 @@ namespace Raicem\Defer;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
-class DeferServiceProvider extends ServiceProvider implements DeferrableServiceProvider
+class DeferServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     public function register()
     {
