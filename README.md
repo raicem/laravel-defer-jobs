@@ -13,19 +13,86 @@ request and response cycle without using a queue system. Please note, this is mo
 
 `php-fpm` exposes a function called [fastcgi_finish_request](https://www.php.net/manual/en/function.fastcgi-finish-request.php) which is used by the Laravel to send the request to the webserver. Laravel also exposes a function in the middlewares that you can do some work after this `fastcgi_finish_request` function is called. This package is basically just a service that collects jobs to be deferrered and runs them in the `terminate` function in the [middleware](https://laravel.com/docs/5.8/middleware#terminable-middleware).
 
-### Usage
+### Installation
 
-This package leverages Laravel's job implementation. Jobs are objects to be sent to the [queue system](https://laravel.com/docs/5.8/queues). However after installing the package and including the `Deferrable` trait in your job class, you can simply call:
+Install package using composer
+
+```bash
+composer require raicem/laravel-defer-jobs
+```
+
+This package support [auto discovery](https://laravel-news.com/package-auto-discovery). So the service provider should be registered automatically.
+
+You have to register the middleware manually. You can register it in the `app/Http/Kernel.php` file.
 
 ```php
-MyJob::defer('my message')
+// app/Http/Kernel.php
+ protected $middleware = [
+     //..
+    \App\Http\Middleware\TrustProxies::class,
+    \Raicem\Defer\Middleware\ExecuteDeferredJobs::class,
+];
+```
+
+Then you are ready to go.
+
+### Usage
+
+This package leverages Laravel's job implementation. Jobs are objects to be sent to the [queue system](https://laravel.com/docs/5.8/queues). 
+
+First you can [create a job](https://laravel.com/docs/5.8/queues#creating-jobs).
+
+```php
+php artisan make:job LogSomething
+```
+
+In your job class implement the `Deferrable` trait.
+
+```php
+use Raicem\Defer\Deferrable;
+
+class LogStuff implements ShouldQueue
+{
+    use Deferrable, SerializesModels;
+
+    
+    public function __construct(Podcast $podcast)
+    {
+    }
+
+    public function handle(AudioProcessor $processor)
+    {
+        // handle job
+    }
+}
+```
+
+Now you can call the job anywhere you want. For example in your controller.
+
+
+```php
+// HomeController.php
+
+use App\Jobs\LogStuff;
+
+class HomeController 
+{
+    public function action()
+    {
+        // do stuff
+        LogStuff::defer('my log message');
+
+        return view('welcome');
+    }
+}
+
 ```
 
 and your job will be executed after the response is sent.
 
 Please note this package does not really care about your queue system. You can still create a job to be sent to queue, following the standard [Laravel documentation](https://laravel.com/docs/5.8/queues).
 
-By using jobs, later down the line you can actually decide to send them to a proper queue system to be executed by simply changing a line of code.
+By using jobs, later down the line you can actually decide to send them to a proper queue system to be executed by simply changing a line of code. You can simply [dispatch them](https://laravel.com/docs/5.8/queues#dispatching-jobs) instead of deferring them.
 
 ### Use cases
 
