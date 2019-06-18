@@ -11,7 +11,9 @@ request and response cycle without using a queue system. Please note, this is mo
 
 ### How
 
-`php-fpm` exposes a function called [fastcgi_finish_request](https://www.php.net/manual/en/function.fastcgi-finish-request.php) which is used by the Laravel to send the request to the webserver. Laravel also exposes a function in the middlewares that you can do some work after this `fastcgi_finish_request` function is called. This package is basically just a service that collects jobs to be deferrered and runs them in the `terminate` function in the [middleware](https://laravel.com/docs/5.8/middleware#terminable-middleware).
+`php-fpm` exposes a function called [fastcgi_finish_request](https://www.php.net/manual/en/function.fastcgi-finish-request.php) which is used by Laravel to send the request to the webserver. 
+
+Laravel exposes a method called `terminate` in the middlewares that allows you to do some work after `fastcgi_finish_request` function is called. This package is basically just a service that collects jobs to be deferrered and runs them in the `terminate` function in a [middleware](https://laravel.com/docs/5.8/middleware#terminable-middleware).
 
 ### Installation
 
@@ -51,16 +53,18 @@ In your job class implement the `Deferrable` trait.
 ```php
 use Raicem\Defer\Deferrable;
 
-class LogStuff implements ShouldQueue
+class LogSomething implements ShouldQueue
 {
     use Deferrable, SerializesModels;
 
+    private $message;
     
-    public function __construct(Podcast $podcast)
+    public function __construct(string $message)
     {
+        $this->message = $message;
     }
 
-    public function handle(AudioProcessor $processor)
+    public function handle()
     {
         // handle job
     }
@@ -73,14 +77,14 @@ Now you can call the job anywhere you want. For example in your controller.
 ```php
 // HomeController.php
 
-use App\Jobs\LogStuff;
+use App\Jobs\LogSomething;
 
 class HomeController 
 {
     public function action()
     {
         // do stuff
-        LogStuff::defer('my log message');
+        LogSomething::defer('my log message');
 
         return view('welcome');
     }
@@ -88,11 +92,11 @@ class HomeController
 
 ```
 
-and your job will be executed after the response is sent.
+Your job will be executed after the response is sent.
 
-Please note this package does not really care about your queue system. You can still create a job to be sent to queue, following the standard [Laravel documentation](https://laravel.com/docs/5.8/queues).
+Please note this package does not have any relation with the queue system. You can still create a job and send it to the proper [queue system](https://laravel.com/docs/5.8/queues). 
 
-By using jobs, later down the line you can actually decide to send them to a proper queue system to be executed by simply changing a line of code. You can simply [dispatch them](https://laravel.com/docs/5.8/queues#dispatching-jobs) instead of deferring them.
+Using job objects will allow you the switch implementations later down the line. If you no longer want to defer jobs and want to send them to the queue system, it very simple.
 
 ### Use cases
 
@@ -101,11 +105,11 @@ By using jobs, later down the line you can actually decide to send them to a pro
 - Gathering analytics data from request or response
 - Making API calls
 
-Basically, some light work that would slow your response down.
+Basically, some light work that would slow your response times.
 
 ### Requirements
 
-This package will only do its effect if you are using php-fpm to execute your code. If you don't use `php-fpm` and still try to use it, it will have no effect and it will run the jobs before the response is sent.
+This package will only do its effect if you are using `php-fpm` to execute your code. If you don't use `php-fpm` and still try to use it, it will have no effect and it will run the jobs before the response is sent.
 
 ### Warning
 
